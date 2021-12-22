@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "String"
+        },
+        "properties": {
+            "type": "Object"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/frontdoors/rulesengines",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('name')]",
+            "properties": {
+                "resourceState": "[parameters('properties').resourcestate]",
+                "rules": "[parameters('properties').rules]"
+            }
+        }
+    ]
+}
