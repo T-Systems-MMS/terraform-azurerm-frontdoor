@@ -1,23 +1,3 @@
-variable "resource_name" {
-  type        = any
-  default     = {}
-  description = "Azure FrontDoor"
-}
-variable "location" {
-  type        = string
-  default     = "global"
-  description = "location where the resource should be created"
-}
-variable "resource_group_name" {
-  type        = string
-  description = "resource_group whitin the resource should be created"
-}
-variable "tags" {
-  type        = any
-  default     = {}
-  description = "mapping of tags to assign, default settings are defined within locals and merged with var settings"
-}
-# resource definition
 variable "frontdoor_firewall_policy" {
   type        = any
   default     = {}
@@ -38,37 +18,66 @@ variable "frontdoor_rules_engine" {
   default     = {}
   description = "resource definition, default settings are defined within locals and merged with var settings"
 }
-# resource configuration
-variable "frontdoor_firewall_config" {
-  type        = any
-  default     = {}
-  description = "resource configuration, default settings are defined within locals and merged with var settings"
-}
-variable "frontdoor_config" {
-  type        = any
-  default     = {}
-  description = "resource configuration, default settings are defined within locals and merged with var settings"
-}
-variable "frontdoor_rules_engine_config" {
-  type        = any
-  default     = {}
-  description = "resource configuration, default settings are defined within locals and merged with var settings"
-}
 
 locals {
-  # default values
   default = {
     # resource definition
-    tags = {}
-
     frontdoor_firewall_policy = {
+      name                              = ""
       enabled                           = true
       mode                              = "Prevention"
       custom_block_response_status_code = 403
+      managed_rule                      = {}
+      custom_rule                       = {}
+      tags                              = {}
     }
     frontdoor = {
-      template_deployment                          = false
+      name                                         = ""
+      location                                     = "global"
+      backend_pools_send_receive_timeout_seconds   = "30"
       enforce_backend_pools_certificate_name_check = true
+      backend_pool_health_probe = {
+        name                = ""
+        enabled             = true
+        path                = "/"
+        probe_method        = "HEAD"
+        protocol            = "Https"
+        interval_in_seconds = "30"
+      }
+      backend_pool_load_balancing = {
+        name = ""
+      }
+      backend_pool = {
+        name = ""
+        backend = {
+          host_header = ""
+          http_port   = 80
+          https_port  = 443
+        }
+      }
+      frontend_endpoint = {
+        name                                    = ""
+        web_application_firewall_policy_link_id = ""
+      }
+      routing_rule = {
+        name               = ""
+        backend_pool_name  = "default"
+        accepted_protocols = ["Http", "Https"]
+        patterns_to_match  = ["/*"]
+        frontend_endpoints = ["frontendendpoint"]
+        forwarding_configuration = {
+          forwarding_protocol                   = ""
+          patterns_to_match                     = ["/*"]
+          cache_enabled                         = true
+          cache_use_dynamic_compression         = true
+          cache_query_parameter_strip_directive = "StripNone"
+        }
+        redirect_configuration = {
+          redirect_protocol = ""
+          redirect_type     = "Found"
+        }
+      }
+      tags = {}
     }
     frontdoor_custom_https_configuration = {
       custom_https_provisioning_enabled          = false
@@ -78,54 +87,9 @@ locals {
       azure_key_vault_certificate_secret_version = ""
     }
     frontdoor_rules_engine = {
+      name             = ""
       deployment_mode  = "Incremental"
       template_content = format("%s/templates/frontdoor_rules_engine.json", path.module)
-    }
-    # resource configuration
-    frontdoor_firewall_config = {
-      managed_rule = {}
-      custom_rule  = {}
-    }
-    frontdoor_config = {
-      backend_pool_health_probe = {
-        enabled             = true
-        path                = "/"
-        probe_method        = "HEAD"
-        protocol            = "Https"
-        interval_in_seconds = "30"
-      }
-      backend_pool_load_balancing = {}
-      backend_pool = {
-        load_balancing_name = "loadbalancing"
-        health_probe_name   = "healthprobe"
-        # backend
-        address     = "0.0.0.0"
-        host_header = ""
-        http_port   = 80
-        https_port  = 443
-      }
-      frontend_endpoint = {
-        host_name                               = "fd.azurefd.net"
-        web_application_firewall_policy_link_id = ""
-      }
-      routing_rule = {
-        backend_pool_name = "default"
-
-        accepted_protocols = ["Http", "Https"]
-        patterns_to_match  = ["/*"]
-        frontend_endpoints = ["frontendendpoint"]
-        configuration      = "forwarding_configuration"
-        # forwarding_configuration
-        forwarding_protocol                   = "MatchRequest"
-        cache_enabled                         = true
-        cache_use_dynamic_compression         = true
-        cache_query_parameter_strip_directive = "StripNone"
-        # redirect_configuration
-        redirect_protocol = "MatchRequest"
-        redirect_type     = "Found"
-      }
-    }
-    frontdoor_rules_engine_config = {
       rules = {
         action           = {}
         match_conditions = {}
@@ -133,56 +97,96 @@ locals {
     }
   }
 
-  # merge custom and default values
-  tags = merge(local.default.tags, var.tags)
-
-  frontdoor_firewall_policy = merge(local.default.frontdoor_firewall_policy, var.frontdoor_firewall_policy)
-  frontdoor                 = merge(local.default.frontdoor, var.frontdoor)
-
-  # deep merge over merged config and use defaults if no variable is set
+  # compare and merge custom and default values
+  frontdoor_firewall_policy_values = {
+    for frontdoor_firewall_policy in keys(var.frontdoor_firewall_policy) :
+    frontdoor_firewall_policy => merge(local.default.frontdoor_firewall_policy, var.frontdoor_firewall_policy[frontdoor_firewall_policy])
+  }
+  frontdoor_values = {
+    for frontdoor in keys(var.frontdoor) :
+    frontdoor => merge(local.default.frontdoor, var.frontdoor[frontdoor])
+  }
+  frontdoor_backend_pool_values = {
+    for frontdoor in keys(var.frontdoor) :
+    frontdoor => {
+      for key in keys(local.frontdoor_values[frontdoor].backend_pool) :
+      key => merge(local.default.frontdoor.backend_pool, local.frontdoor_values[frontdoor].backend_pool[key])
+    }
+  }
+  frontdoor_routing_rule_values = {
+    for frontdoor in keys(var.frontdoor) :
+    frontdoor => {
+      for key in keys(local.frontdoor_values[frontdoor].routing_rule) :
+      key => merge(local.default.frontdoor.routing_rule, local.frontdoor_values[frontdoor].routing_rule[key])
+    }
+  }
+  frontdoor_rules_engine_values = {
+    for frontdoor_rules_engine in keys(var.frontdoor_rules_engine) :
+    frontdoor_rules_engine => merge(local.default.frontdoor_rules_engine, var.frontdoor_rules_engine[frontdoor_rules_engine])
+  }
+  # merge all custom and default values
+  frontdoor_firewall_policy = {
+    for frontdoor_firewall_policy in keys(var.frontdoor_firewall_policy) :
+    frontdoor_firewall_policy => merge(
+      local.frontdoor_firewall_policy_values[frontdoor_firewall_policy],
+      {
+        for config in ["managed_rule", "custom_rule"] :
+        config => merge(local.default.frontdoor_firewall_policy[config], local.frontdoor_firewall_policy_values[frontdoor_firewall_policy][config])
+      }
+    )
+  }
+  frontdoor = {
+    for frontdoor in keys(var.frontdoor) :
+    frontdoor => merge(
+      local.frontdoor_values[frontdoor],
+      {
+        for config in ["backend_pool_health_probe", "backend_pool_load_balancing", "frontend_endpoint"] :
+        config => {
+          for key in keys(local.frontdoor_values[frontdoor][config]) :
+          key => merge(local.default.frontdoor[config], local.frontdoor_values[frontdoor][config][key])
+        }
+      },
+      {
+        backend_pool = {
+          for key in keys(local.frontdoor_backend_pool_values[frontdoor]) :
+          key => merge(
+            local.frontdoor_backend_pool_values[frontdoor][key],
+            {
+              for config in ["backend"] :
+              config => merge(local.default.frontdoor.backend_pool[config], local.frontdoor_backend_pool_values[frontdoor][key][config])
+            }
+          )
+        }
+      },
+      {
+        routing_rule = {
+          for key in keys(local.frontdoor_routing_rule_values[frontdoor]) :
+          key => merge(
+            local.frontdoor_routing_rule_values[frontdoor][key],
+            {
+              for config in ["forwarding_configuration", "redirect_configuration"] :
+              config => merge(local.default.frontdoor.routing_rule[config], local.frontdoor_routing_rule_values[frontdoor][key][config])
+            }
+          )
+        }
+      }
+    )
+  }
   frontdoor_custom_https_configuration = {
-    # get all config
-    for instance in keys(var.frontdoor_custom_https_configuration) :
-    instance => merge(local.default.frontdoor_custom_https_configuration, var.frontdoor_custom_https_configuration[instance])
+    for frontdoor_custom_https_configuration in keys(var.frontdoor_custom_https_configuration) :
+    frontdoor_custom_https_configuration => merge(local.default.frontdoor_custom_https_configuration, var.frontdoor_custom_https_configuration[frontdoor_custom_https_configuration])
   }
-
-  frontdoor_firewall_config = {
-    # get all config
-    for instance in keys(var.frontdoor_firewall_config) :
-    instance => merge(local.default.frontdoor_firewall_config, var.frontdoor_firewall_config[instance])
-  }
-
-  frontdoor_config = {
-    # get frontdoor instance config
-    ## frontdoor-00, frontdoor-01
-    for instance in keys(var.frontdoor_config) :
-    instance => {
-      # get all config
-      ## backend_pool, frontend_endpoint etc
-      for config in keys(local.default.frontdoor_config) :
-      config => {
-        # merge default values and values from each config instance
-        for config_instance in keys(var.frontdoor_config[instance][config]) :
-        config_instance => merge(local.default.frontdoor_config[config], var.frontdoor_config[instance][config][config_instance])
-      }
-    }
-  }
-
   frontdoor_rules_engine = {
-    # get all config
-    for instance in keys(var.frontdoor_rules_engine) :
-    instance => merge(local.default.frontdoor_rules_engine, var.frontdoor_rules_engine[instance])
-  }
-
-  frontdoor_rules_engine_config = {
-    # get frontdoor_rules_engine instance config
-    for instance in keys(var.frontdoor_rules_engine_config) :
-    instance => {
-      for config in keys(local.default.frontdoor_rules_engine_config) :
-      config => {
-        for config_instance in keys(var.frontdoor_rules_engine_config[instance][config]) :
-        config_instance => merge(local.default.frontdoor_rules_engine_config[config], var.frontdoor_rules_engine_config[instance][config][config_instance])
-      }
-    }
+    for frontdoor_rules_engine in keys(var.frontdoor_rules_engine) :
+    frontdoor_rules_engine => merge(
+      local.frontdoor_rules_engine_values[frontdoor_rules_engine],
+      {
+        for config in ["rules"] :
+        config => {
+          for key in keys(local.frontdoor_rules_engine_values[frontdoor_rules_engine][config]) :
+          key => merge(local.default.frontdoor_rules_engine[config], local.frontdoor_rules_engine_values[frontdoor_rules_engine][config][key])
+        }
+      },
+    )
   }
 }

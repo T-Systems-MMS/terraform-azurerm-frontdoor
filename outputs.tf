@@ -2,9 +2,9 @@ output "frontdoor" {
   description = "azurerm_frontdoor results"
   value = {
     for frontdoor in keys(azurerm_frontdoor.frontdoor) :
-    frontdoor =>{
-      id   = azurerm_frontdoor.frontdoor[frontdoor].id
-      name = azurerm_frontdoor.frontdoor[frontdoor].name
+    frontdoor => {
+      id                 = azurerm_frontdoor.frontdoor[frontdoor].id
+      name               = azurerm_frontdoor.frontdoor[frontdoor].name
       frontend_endpoints = azurerm_frontdoor.frontdoor[frontdoor].frontend_endpoints
     }
   }
