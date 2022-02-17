@@ -1,5 +1,5 @@
 module "frontdoor" {
-  source = "../modules/azure/terraform-frontdoor"
+  source = "registry.terraform.io/T-Systems-MMS/frontdoor/azurerm"
   frontdoor_firewall_policy = {
     env = {
       name                = "servicefdwafpolicy"
