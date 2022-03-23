@@ -233,7 +233,8 @@ resource "null_resource" "frontdoor_routing_rule-rules_engine" {
   for_each = var.frontdoor_rules_engine
 
   triggers = {
-    always_run = timestamp()
+    routing_rule   = local.frontdoor_rules_engine[each.key].routing_rule_name
+    frontdoor_name = local.frontdoor_rules_engine[each.key].frontdoor_name
   }
 
   provisioner "local-exec" {
@@ -246,7 +247,8 @@ resource "null_resource" "frontdoor_rules_engine" {
   for_each = var.frontdoor
 
   triggers = {
-    always_run = timestamp()
+    frontdoor_name = azurerm_frontdoor.frontdoor[each.key].name
+    rules_engine   = join(" ", keys(var.frontdoor_rules_engine))
   }
 
   provisioner "local-exec" {
