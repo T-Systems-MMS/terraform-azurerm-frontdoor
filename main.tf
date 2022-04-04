@@ -233,11 +233,13 @@ resource "null_resource" "frontdoor_routing_rule-rules_engine" {
   for_each = var.frontdoor_rules_engine
 
   triggers = {
-    always_run = timestamp()
+    routing_rule       = local.frontdoor_rules_engine[each.key].routing_rule_name
+    frontdoor_name     = local.frontdoor_rules_engine[each.key].frontdoor_name
+    parameters_content = azurerm_resource_group_template_deployment.frontdoor_rules_engine[each.key].parameters_content
   }
 
   provisioner "local-exec" {
-    command = "az network front-door routing-rule update --name ${local.frontdoor_rules_engine[each.key].routing_rule_name} --resource-group ${local.frontdoor[each.key].resource_group_name} --front-door-name ${local.frontdoor_rules_engine[each.key].frontdoor_name} --rules-engine ${each.key}"
+    command = "az network front-door routing-rule update --name ${local.frontdoor_rules_engine[each.key].routing_rule_name} --resource-group ${azurerm_resource_group_template_deployment.frontdoor_rules_engine[each.key].resource_group_name} --front-door-name ${local.frontdoor_rules_engine[each.key].frontdoor_name} --rules-engine ${azurerm_resource_group_template_deployment.frontdoor_rules_engine[each.key].name}"
   }
 }
 
@@ -246,7 +248,8 @@ resource "null_resource" "frontdoor_rules_engine" {
   for_each = var.frontdoor
 
   triggers = {
-    always_run = timestamp()
+    frontdoor_name = azurerm_frontdoor.frontdoor[each.key].name
+    rules_engine   = join(" ", keys(var.frontdoor_rules_engine))
   }
 
   provisioner "local-exec" {
@@ -254,6 +257,6 @@ resource "null_resource" "frontdoor_rules_engine" {
       RULES = join("|", keys(var.frontdoor_rules_engine))
     }
 
-    command = "for REMOVE_RULE in $(az network front-door rules-engine list --resource-group ${local.frontdoor[each.key].resource_group_name} --front-door-name ${azurerm_frontdoor.frontdoor[each.key].name} --query '[].name' -o tsv | egrep -v $RULES); do $(az network front-door rules-engine delete --resource-group ${local.frontdoor[each.key].resource_group_name} --front-door-name ${azurerm_frontdoor.frontdoor[each.key].name} --name $REMOVE_RULE); done"
+    command = "for REMOVE_RULE in $(az network front-door rules-engine list --resource-group ${azurerm_frontdoor.frontdoor[each.key].resource_group_name} --front-door-name ${azurerm_frontdoor.frontdoor[each.key].name} --query '[].name' -o tsv | egrep -v $RULES); do $(az network front-door rules-engine delete --resource-group ${azurerm_frontdoor.frontdoor[each.key].resource_group_name} --front-door-name ${azurerm_frontdoor.frontdoor[each.key].name} --name $REMOVE_RULE); done"
   }
 }
