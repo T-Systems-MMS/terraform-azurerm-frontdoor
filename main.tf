@@ -67,11 +67,33 @@ resource "azurerm_frontdoor_firewall_policy" "frontdoor_firewall_policy" {
 resource "azurerm_frontdoor" "frontdoor" {
   for_each = var.frontdoor
 
-  name                                         = local.frontdoor[each.key].name == "" ? each.key : local.frontdoor[each.key].name
-  resource_group_name                          = local.frontdoor[each.key].resource_group_name
-  location                                     = local.frontdoor[each.key].location
-  backend_pools_send_receive_timeout_seconds   = local.frontdoor[each.key].backend_pools_send_receive_timeout_seconds
-  enforce_backend_pools_certificate_name_check = local.frontdoor[each.key].enforce_backend_pools_certificate_name_check
+  name                  = local.frontdoor[each.key].name == "" ? each.key : local.frontdoor[each.key].name
+  resource_group_name   = local.frontdoor[each.key].resource_group_name
+  load_balancer_enabled = local.frontdoor[each.key].load_balancer_enabled
+  friendly_name         = local.frontdoor[each.key].friendly_name
+
+  backend_pool_settings {
+    backend_pools_send_receive_timeout_seconds   = local.frontdoor[each.key].backend_pool_settings.backend_pools_send_receive_timeout_seconds
+    enforce_backend_pools_certificate_name_check = local.frontdoor[each.key].backend_pool_settings.enforce_backend_pools_certificate_name_check
+  }
+
+  dynamic "backend_pool" {
+    for_each = local.frontdoor[each.key].backend_pool
+    content {
+      name                = local.frontdoor[each.key].backend_pool[backend_pool.key].name == "" ? backend_pool.key : local.frontdoor[each.key].backend_pool[backend_pool.key].name
+      load_balancing_name = local.frontdoor[each.key].backend_pool[backend_pool.key].load_balancing_name
+      health_probe_name   = local.frontdoor[each.key].backend_pool[backend_pool.key].health_probe_name
+      backend {
+        enabled     = local.frontdoor[each.key].backend_pool[backend_pool.key].backend.enabled
+        address     = local.frontdoor[each.key].backend_pool[backend_pool.key].backend.address
+        host_header = local.frontdoor[each.key].backend_pool[backend_pool.key].backend.host_header
+        http_port   = local.frontdoor[each.key].backend_pool[backend_pool.key].backend.http_port
+        https_port  = local.frontdoor[each.key].backend_pool[backend_pool.key].backend.https_port
+        priority    = local.frontdoor[each.key].backend_pool[backend_pool.key].backend.priority
+        weight      = local.frontdoor[each.key].backend_pool[backend_pool.key].backend.weight
+      }
+    }
+  }
 
   dynamic "backend_pool_health_probe" {
     for_each = local.frontdoor[each.key].backend_pool_health_probe
@@ -88,22 +110,10 @@ resource "azurerm_frontdoor" "frontdoor" {
   dynamic "backend_pool_load_balancing" {
     for_each = local.frontdoor[each.key].backend_pool_load_balancing
     content {
-      name = local.frontdoor[each.key].backend_pool_load_balancing[backend_pool_load_balancing.key].name == "" ? backend_pool_load_balancing.key : local.frontdoor[each.key].backend_pool_load_balancing[backend_pool_load_balancing.key].name
-    }
-  }
-
-  dynamic "backend_pool" {
-    for_each = local.frontdoor[each.key].backend_pool
-    content {
-      name                = local.frontdoor[each.key].backend_pool[backend_pool.key].name == "" ? backend_pool.key : local.frontdoor[each.key].backend_pool[backend_pool.key].name
-      load_balancing_name = local.frontdoor[each.key].backend_pool[backend_pool.key].load_balancing_name
-      health_probe_name   = local.frontdoor[each.key].backend_pool[backend_pool.key].health_probe_name
-      backend {
-        address     = local.frontdoor[each.key].backend_pool[backend_pool.key].backend.address
-        host_header = local.frontdoor[each.key].backend_pool[backend_pool.key].backend.host_header
-        http_port   = local.frontdoor[each.key].backend_pool[backend_pool.key].backend.http_port
-        https_port  = local.frontdoor[each.key].backend_pool[backend_pool.key].backend.https_port
-      }
+      name                            = local.frontdoor[each.key].backend_pool_load_balancing[backend_pool_load_balancing.key].name == "" ? backend_pool_load_balancing.key : local.frontdoor[each.key].backend_pool_load_balancing[backend_pool_load_balancing.key].name
+      sample_size                     = local.frontdoor[each.key].backend_pool_load_balancing[backend_pool_load_balancing.key].sample_size
+      successful_samples_required     = local.frontdoor[each.key].backend_pool_load_balancing[backend_pool_load_balancing.key].successful_samples_required
+      additional_latency_milliseconds = local.frontdoor[each.key].backend_pool_load_balancing[backend_pool_load_balancing.key].additional_latency_milliseconds
     }
   }
 
@@ -112,6 +122,8 @@ resource "azurerm_frontdoor" "frontdoor" {
     content {
       name                                    = local.frontdoor[each.key].frontend_endpoint[frontend_endpoint.key].name == "" ? frontend_endpoint.key : local.frontdoor[each.key].frontend_endpoint[frontend_endpoint.key].name
       host_name                               = local.frontdoor[each.key].frontend_endpoint[frontend_endpoint.key].host_name
+      session_affinity_enabled                = local.frontdoor[each.key].frontend_endpoint[frontend_endpoint.key].session_affinity_enabled
+      session_affinity_ttl_seconds            = local.frontdoor[each.key].frontend_endpoint[frontend_endpoint.key].session_affinity_ttl_seconds
       web_application_firewall_policy_link_id = local.frontdoor[each.key].frontend_endpoint[frontend_endpoint.key].web_application_firewall_policy_link_id
     }
   }
@@ -122,6 +134,7 @@ resource "azurerm_frontdoor" "frontdoor" {
       name               = local.frontdoor[each.key].routing_rule[routing_rule.key].name == "" ? routing_rule.key : local.frontdoor[each.key].routing_rule[routing_rule.key].name
       accepted_protocols = local.frontdoor[each.key].routing_rule[routing_rule.key].accepted_protocols
       patterns_to_match  = local.frontdoor[each.key].routing_rule[routing_rule.key].patterns_to_match
+      enabled            = local.frontdoor[each.key].routing_rule[routing_rule.key].enabled
       frontend_endpoints = local.frontdoor[each.key].routing_rule[routing_rule.key].frontend_endpoints
       /** if forwarding_configuration is set */
       dynamic "forwarding_configuration" {
@@ -132,14 +145,21 @@ resource "azurerm_frontdoor" "frontdoor" {
           cache_enabled                         = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.cache_enabled
           cache_use_dynamic_compression         = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.cache_use_dynamic_compression
           cache_query_parameter_strip_directive = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.cache_query_parameter_strip_directive
+          cache_query_parameters                = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.cache_query_parameters
+          cache_duration                        = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.cache_duration
+          custom_forwarding_path                = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.custom_forwarding_path
         }
       }
       /** if redirect_configuration is set */
       dynamic "redirect_configuration" {
         for_each = local.frontdoor[each.key].routing_rule[routing_rule.key].redirect_configuration.redirect_protocol != "" ? [1] : []
         content {
-          redirect_protocol = local.frontdoor[each.key].routing_rule[routing_rule.key].redirect_configuration.redirect_protocol
-          redirect_type     = local.frontdoor[each.key].routing_rule[routing_rule.key].redirect_configuration.redirect_type
+          custom_host         = local.frontdoor[each.key].routing_rule[routing_rule.key].redirect_configuration.custom_host
+          redirect_protocol   = local.frontdoor[each.key].routing_rule[routing_rule.key].redirect_configuration.redirect_protocol
+          redirect_type       = local.frontdoor[each.key].routing_rule[routing_rule.key].redirect_configuration.redirect_type
+          custom_fragment     = local.frontdoor[each.key].routing_rule[routing_rule.key].redirect_configuration.custom_fragment
+          custom_path         = local.frontdoor[each.key].routing_rule[routing_rule.key].redirect_configuration.custom_path
+          custom_query_string = local.frontdoor[each.key].routing_rule[routing_rule.key].redirect_configuration.custom_query_string
         }
       }
     }
