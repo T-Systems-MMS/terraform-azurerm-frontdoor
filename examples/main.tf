@@ -36,8 +36,8 @@ module "frontdoor" {
   }
   frontdoor = {
     env = {
-      name                                         = "service-env-fd"
-      resource_group_name                          = "service-env-rg"
+      name                = "service-env-fd"
+      resource_group_name = "service-env-rg"
       backend_pool_settings = {
         backend_pools_send_receive_timeout_seconds   = 60
         enforce_backend_pools_certificate_name_check = true

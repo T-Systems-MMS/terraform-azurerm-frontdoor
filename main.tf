@@ -140,10 +140,10 @@ resource "azurerm_frontdoor" "frontdoor" {
       dynamic "forwarding_configuration" {
         for_each = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.forwarding_protocol != "" && local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.cache_enabled == false ? [1] : []
         content {
-          forwarding_protocol                   = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.forwarding_protocol
-          backend_pool_name                     = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.backend_pool_name
-          cache_enabled                         = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.cache_enabled
-          custom_forwarding_path                = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.custom_forwarding_path
+          forwarding_protocol    = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.forwarding_protocol
+          backend_pool_name      = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.backend_pool_name
+          cache_enabled          = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.cache_enabled
+          custom_forwarding_path = local.frontdoor[each.key].routing_rule[routing_rule.key].forwarding_configuration.custom_forwarding_path
         }
       }
       dynamic "forwarding_configuration" {
