@@ -32,10 +32,13 @@ locals {
       tags                              = {}
     }
     frontdoor = {
-      name                                         = ""
-      location                                     = "global"
-      backend_pools_send_receive_timeout_seconds   = "30"
-      enforce_backend_pools_certificate_name_check = true
+      name                  = ""
+      load_balancer_enabled = true
+      friendly_name         = null
+      backend_pool_settings = {
+        backend_pools_send_receive_timeout_seconds   = "30"
+        enforce_backend_pools_certificate_name_check = true
+      }
       backend_pool_health_probe = {
         name                = ""
         enabled             = true
@@ -45,18 +48,26 @@ locals {
         interval_in_seconds = "30"
       }
       backend_pool_load_balancing = {
-        name = ""
+        name                            = ""
+        sample_size                     = 4
+        successful_samples_required     = 2
+        additional_latency_milliseconds = 0
       }
       backend_pool = {
         name = ""
         backend = {
+          enabled     = true
           host_header = ""
           http_port   = 80
           https_port  = 443
+          priority    = 1
+          weight      = 50
         }
       }
       frontend_endpoint = {
         name                                    = ""
+        session_affinity_enabled                = false
+        session_affinity_ttl_seconds            = 0
         web_application_firewall_policy_link_id = ""
       }
       routing_rule = {
@@ -64,6 +75,7 @@ locals {
         backend_pool_name  = "default"
         accepted_protocols = ["Http", "Https"]
         patterns_to_match  = ["/*"]
+        enabled            = true
         frontend_endpoints = ["frontendendpoint"]
         forwarding_configuration = {
           forwarding_protocol                   = ""
@@ -71,10 +83,17 @@ locals {
           cache_enabled                         = true
           cache_use_dynamic_compression         = true
           cache_query_parameter_strip_directive = "StripNone"
+          cache_query_parameters                = null
+          cache_duration                        = "P1DT0H"
+          custom_forwarding_path                = null
         }
         redirect_configuration = {
-          redirect_protocol = ""
-          redirect_type     = "Found"
+          custom_host         = null
+          redirect_protocol   = ""
+          redirect_type       = "Found"
+          custom_fragment     = null
+          custom_path         = null
+          custom_query_string = null
         }
       }
       tags = {}
@@ -139,6 +158,10 @@ locals {
     for frontdoor in keys(var.frontdoor) :
     frontdoor => merge(
       local.frontdoor_values[frontdoor],
+      {
+        for config in ["backend_pool_settings"] :
+        config => merge(local.default.frontdoor[config], local.frontdoor_values[frontdoor][config])
+      },
       {
         for config in ["backend_pool_health_probe", "backend_pool_load_balancing", "frontend_endpoint"] :
         config => {
