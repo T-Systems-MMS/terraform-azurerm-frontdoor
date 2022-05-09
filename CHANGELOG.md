@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.0.0](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.0.0) (2022-05-09)
+
+[Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/1.0.1...2.0.0)
+
+**Merged pull requests:**
+
+- chore\(deps\): update hashicorp/setup-terraform action to v2 [\#11](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/11) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update creyd/prettier\_action action to v4 [\#10](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/10) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update actions/checkout action [\#9](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/9) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update github-actions-x/commit action to v2.9 [\#8](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/8) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update actions/checkout action to v2.4.2 [\#5](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/5) ([renovate[bot]](https://github.com/apps/renovate))
+- add renovate config [\#4](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/4) ([michaelamattes](https://github.com/michaelamattes))
+- Azurerm 3x [\#3](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/3) ([michaelamattes](https://github.com/michaelamattes))
+
 ## [1.0.1](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/1.0.1) (2022-04-14)
 
 [Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/1.0.0...1.0.1)
