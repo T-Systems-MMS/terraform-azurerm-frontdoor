@@ -10,13 +10,13 @@ This module manages Azure FrontDoor.
 | Name | Version |
 |------|---------|
 | terraform | ~>1.0 |
-| azurerm | ~>2.79 |
+| azurerm | >=3.2 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| azurerm | ~>2.79 |
+| azurerm | >=3.2 |
 | null | n/a |
 
 ## Resources
@@ -87,10 +87,12 @@ module "frontdoor" {
   }
   frontdoor = {
     env = {
-      name                                         = "service-env-fd"
-      resource_group_name                          = "service-env-rg"
-      backend_pools_send_receive_timeout_seconds   = 60
-      enforce_backend_pools_certificate_name_check = true
+      name                = "service-env-fd"
+      resource_group_name = "service-env-rg"
+      backend_pool_settings = {
+        backend_pools_send_receive_timeout_seconds   = 60
+        enforce_backend_pools_certificate_name_check = true
+      }
       backend_pool_health_probe = {
         healthprobe = {}
       }

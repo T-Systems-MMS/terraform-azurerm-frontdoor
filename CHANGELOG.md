@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.1](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/1.0.1) (2022-04-14)
+
+[Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/1.0.0...1.0.1)
+
+**Merged pull requests:**
+
+- run null\_resource updates only on changes [\#2](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/2) ([michaelamattes](https://github.com/michaelamattes))
+
+## [1.0.0](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/1.0.0) (2022-02-17)
+
+[Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/0.0.2...1.0.0)
+
+**Merged pull requests:**
+
+- change variable behaviour [\#1](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/1) ([michaelamattes](https://github.com/michaelamattes))
+
 ## [0.0.2](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/0.0.2) (2021-12-22)
 
 [Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/0.0.1...0.0.2)
