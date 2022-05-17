@@ -84,7 +84,7 @@ locals {
           cache_use_dynamic_compression         = true
           cache_query_parameter_strip_directive = "StripNone"
           cache_query_parameters                = null
-          cache_duration                        = "P1DT0H"
+          cache_duration                        = "P1D"
           custom_forwarding_path                = null
         }
         redirect_configuration = {
