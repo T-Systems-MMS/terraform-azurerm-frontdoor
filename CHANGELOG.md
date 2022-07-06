@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.1](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.0.1) (2022-05-17)
+
+[Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/2.0.0...2.0.1)
+
+**Fixed bugs:**
+
+- change default value for cache\_duration [\#13](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/13) ([michaelamattes](https://github.com/michaelamattes))
+
+**Merged pull requests:**
+
+- chore\(deps\): update terraform azurerm to v3 [\#12](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/12) ([renovate[bot]](https://github.com/apps/renovate))
+
 ## [2.0.0](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.0.0) (2022-05-09)
 
 [Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/1.0.1...2.0.0)

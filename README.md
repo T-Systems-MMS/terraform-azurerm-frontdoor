@@ -184,7 +184,7 @@ module "frontdoor" {
     derules = {
       resource_group_name = "service-env-rg"
       frontdoor_name      = module.frontdoor.frontdoor.env.name
-      routing_rule_name   = "non-backend"
+      routing_rule_name   = "kubernetes_cluster_controller non-backend"
       rules = {
         entire = {
           priority                  = "0"
