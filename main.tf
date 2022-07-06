@@ -268,7 +268,11 @@ resource "null_resource" "frontdoor_routing_rule-rules_engine" {
   }
 
   provisioner "local-exec" {
-    command = "az network front-door routing-rule update --name ${local.frontdoor_rules_engine[each.key].routing_rule_name} --resource-group ${azurerm_resource_group_template_deployment.frontdoor_rules_engine[each.key].resource_group_name} --front-door-name ${local.frontdoor_rules_engine[each.key].frontdoor_name} --rules-engine ${azurerm_resource_group_template_deployment.frontdoor_rules_engine[each.key].name}"
+    environment = {
+      ROUTING_RULES = local.frontdoor_rules_engine[each.key].routing_rule_name
+    }
+
+    command = "for ROUTING_RULE in $ROUTING_RULES; do $(az network front-door routing-rule update --name $ROUTING_RULE --resource-group ${azurerm_resource_group_template_deployment.frontdoor_rules_engine[each.key].resource_group_name} --front-door-name ${local.frontdoor_rules_engine[each.key].frontdoor_name} --rules-engine ${azurerm_resource_group_template_deployment.frontdoor_rules_engine[each.key].name}); done"
   }
 }
 
