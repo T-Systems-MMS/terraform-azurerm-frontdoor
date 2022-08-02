@@ -240,9 +240,10 @@ locals {
                 configkey => merge(
                   merge(local.default.frontdoor_firewall_policy.managed_rule[config], local.frontdoor_firewall_policy_managed_rule_values[frontdoor_firewall_policy][key][config][configkey]),
                   {
-                    rule = {
-                      for subconfigkey in keys(merge(local.default.frontdoor_firewall_policy.managed_rule[config], local.frontdoor_firewall_policy_managed_rule_values[frontdoor_firewall_policy][key][config][configkey]).rule) :
-                      subconfigkey => merge(local.default.frontdoor_firewall_policy.managed_rule[config].rule, local.frontdoor_firewall_policy_managed_rule_values[frontdoor_firewall_policy][key][config][configkey].rule[subconfigkey])
+                    for subconfig in ["exclusion", "rule"] :
+                    subconfig => {
+                      for subconfigkey in keys(lookup(local.frontdoor_firewall_policy_managed_rule_values[frontdoor_firewall_policy][key][config][configkey], subconfig, {})) :
+                      subconfigkey => merge(local.default.frontdoor_firewall_policy.managed_rule[config][subconfig], local.frontdoor_firewall_policy_managed_rule_values[frontdoor_firewall_policy][key][config][configkey][subconfig][subconfigkey])
                     }
                   }
                 )

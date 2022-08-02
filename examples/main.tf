@@ -22,7 +22,18 @@ module "frontdoor" {
                 }
                 941221 = {
                   action  = "Log"
+                  enabled = true
                   rule_id = "941221"
+                }
+              }
+            }
+            SQLI = {
+              rule_group_name = "SQLI"
+              exclusion = {
+                not_suspicious = {
+                  match_variable = "QueryStringArgNames"
+                  operator       = "Equals"
+                  selector       = "really_not_suspicious"
                 }
               }
             }
