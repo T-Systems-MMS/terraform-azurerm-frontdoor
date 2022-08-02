@@ -10,13 +10,13 @@ This module manages Azure FrontDoor.
 | Name | Version |
 |------|---------|
 | terraform | ~>1.0 |
-| azurerm | >=3.2 |
+| azurerm | >=3.15 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| azurerm | >=3.2 |
+| azurerm | >=3.15 |
 | null | n/a |
 
 ## Resources
@@ -26,6 +26,7 @@ This module manages Azure FrontDoor.
 | azurerm_frontdoor.frontdoor | resource |
 | azurerm_frontdoor_custom_https_configuration.frontdoor_custom_https_configuration | resource |
 | azurerm_frontdoor_firewall_policy.frontdoor_firewall_policy | resource |
+| azurerm_frontdoor_rules_engine.frontdoor_rules_engine | resource |
 | azurerm_resource_group_template_deployment.frontdoor_rules_engine | resource |
 | [null_resource.frontdoor_routing_rule-rules_engine](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.frontdoor_rules_engine](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
@@ -60,14 +61,39 @@ module "frontdoor" {
         Microsoft_BotManagerRuleSet = {
           type     = "Microsoft_BotManagerRuleSet"
           version  = "1.0"
-          override = []
+        }
+        Microsoft_DefaultRuleSet = {
+          type    = "Microsoft_DefaultRuleSet"
+          version = "1.1"
+          override = {
+            XSS = {
+              rule_group_name = "XSS"
+              rule = {
+                941220 = {
+                  rule_id = "941220"
+                }
+                941221 = {
+                  action  = "Log"
+                  enabled = true
+                  rule_id = "941221"
+                }
+              }
+            }
+            SQLI = {
+              rule_group_name = "SQLI"
+              exclusion = {
+                not_suspicious = {
+                  match_variable = "QueryStringArgNames"
+                  operator       = "Equals"
+                  selector       = "really_not_suspicious"
+                }
+              }
+            }
+          }
         }
       }
       custom_rule = {
-        ip_access = {
-          name     = "iprestriction"
-          action   = "Block"
-          enabled  = true
+        iprestriction = {
           priority = 0
           type     = "MatchRule"
           match_conditions = {
@@ -135,6 +161,7 @@ module "frontdoor" {
           forwarding_configuration = {
             backend_pool_name   = "kubernetes_cluster_controller"
             forwarding_protocol = "MatchRequest"
+            cache_enabled       = false
           }
         }
         kubernetes_cluster_controller = {
@@ -182,31 +209,32 @@ module "frontdoor" {
   }
   frontdoor_rules_engine = {
     derules = {
-      resource_group_name = "service-env-rg"
       frontdoor_name      = module.frontdoor.frontdoor.env.name
+      resource_group_name = "service-env-rg"
       routing_rule_name   = "kubernetes_cluster_controller non-backend"
-      rules = {
-        entire = {
+      rule = {
+        redirectde = {
           priority                  = "0"
-          match_processing_behavior = "Stop"
           action = {
             route_configuration_override = {
               custom_host       = "domain-de"
               custom_path       = "/"
-              redirect_protocol = "HttpsOnly"
               redirect_type     = "PermanentRedirect"
             }
           }
-          match_conditions = [
-            {
-              match_value      = ["domain-de domain-de/"]
-              match_variable   = "RequestUri"
-              operator         = "Equal"
-              negate_condition = false
-              selector         = ""
-              transforms       = []
+          match_condition = {
+            header = {
+              variable = "RequestHeader"
+              selector = "accept-language"
+              operator = "Contains"
+              value    = ["de"]
             }
-          ]
+            uri = {
+              variable = "RequestUri"
+              operator = "EndsWith"
+              value    = ["domain.com domain.com/"]
+            }
+          }
         }
       }
     }

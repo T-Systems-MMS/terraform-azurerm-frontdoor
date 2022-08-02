@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.1.0](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.1.0) (2022-08-02)
+
+[Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/2.0.2...2.1.0)
+
+**Closed issues:**
+
+- Updating Routing rules leads to error [\#15](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/issues/15)
+
+## [2.0.2](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.0.2) (2022-07-06)
+
+[Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/2.0.1...2.0.2)
+
+**Fixed bugs:**
+
+- fix routing\_rule mapping to allow multiple routing\_rules to rules\_engine [\#14](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/14) ([michaelamattes](https://github.com/michaelamattes))
+
 ## [2.0.1](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.0.1) (2022-05-17)
 
 [Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/2.0.0...2.0.1)
