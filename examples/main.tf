@@ -44,7 +44,7 @@ module "frontdoor" {
         iprestriction = {
           priority = 0
           type     = "MatchRule"
-          match_conditions = {
+          match_condition = {
             localhost = {
               match_variable     = "RemoteAddr"
               operator           = "IPMatch"
