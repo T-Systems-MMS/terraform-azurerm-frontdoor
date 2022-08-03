@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.1.1](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.1.1) (2022-08-03)
+
+[Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/2.1.0...2.1.1)
+
+**Closed issues:**
+
+- Supporting Front Door Service exclusion lists in WAF [\#17](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/issues/17)
+- Support of header definition [\#16](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/issues/16)
+
 ## [2.1.0](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.1.0) (2022-08-02)
 
 [Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/2.0.2...2.1.0)
@@ -7,6 +16,10 @@
 **Closed issues:**
 
 - Updating Routing rules leads to error [\#15](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/issues/15)
+
+**Merged pull requests:**
+
+- Issue 17 16 [\#18](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/18) ([michaelamattes](https://github.com/michaelamattes))
 
 ## [2.0.2](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.0.2) (2022-07-06)
 
