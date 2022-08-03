@@ -244,7 +244,7 @@ resource "azurerm_frontdoor_custom_https_configuration" "frontdoor_custom_https_
 # * https://docs.microsoft.com/en-us/cli/azure/ext/front-door/network/front-door/rules-engine?view=azure-cli-latest
 # */
 resource "azurerm_resource_group_template_deployment" "frontdoor_rules_engine" {
-  for_each = toset(local.frontdoor_rules_engine_keys.override)
+  for_each = toset(local.frontdoor_rules_engine_action.override)
 
   name                = local.frontdoor_rules_engine[each.key].name == "" ? each.key : local.frontdoor_rules_engine[each.key].name
   resource_group_name = local.frontdoor_rules_engine[each.key].resource_group_name
@@ -300,12 +300,12 @@ resource "azurerm_resource_group_template_deployment" "frontdoor_rules_engine" {
 
 /**  add rules engine to routing rule */
 resource "null_resource" "frontdoor_routing_rule-rules_engine" {
-  for_each = toset(local.frontdoor_rules_engine_keys.override)
+  for_each = var.frontdoor_rules_engine
 
   triggers = {
     routing_rule       = local.frontdoor_rules_engine[each.key].routing_rule_name
     frontdoor_name     = local.frontdoor_rules_engine[each.key].frontdoor_name
-    parameters_content = azurerm_resource_group_template_deployment.frontdoor_rules_engine[each.key].parameters_content
+    parameters_content = contains(local.frontdoor_rules_engine_action.override, each.key) == true ? azurerm_resource_group_template_deployment.frontdoor_rules_engine[each.key].parameters_content : ""
   }
 
   provisioner "local-exec" {
@@ -313,7 +313,7 @@ resource "null_resource" "frontdoor_routing_rule-rules_engine" {
       ROUTING_RULES = local.frontdoor_rules_engine[each.key].routing_rule_name
     }
 
-    command = "for ROUTING_RULE in $($ROUTING_RULES); do $(az network front-door routing-rule update --name $ROUTING_RULE --resource-group ${azurerm_resource_group_template_deployment.frontdoor_rules_engine[each.key].resource_group_name} --front-door-name ${local.frontdoor_rules_engine[each.key].frontdoor_name} --rules-engine ${azurerm_resource_group_template_deployment.frontdoor_rules_engine[each.key].name}); done"
+    command = "for ROUTING_RULE in $($ROUTING_RULES); do $(az network front-door routing-rule update --name $ROUTING_RULE --resource-group ${local.frontdoor_rules_engine[each.key].resource_group_name} --front-door-name ${local.frontdoor_rules_engine[each.key].frontdoor_name} --rules-engine ${local.frontdoor_rules_engine[each.key].name == "" ? each.key : local.frontdoor_rules_engine[each.key].name}); done"
   }
 }
 
@@ -323,12 +323,12 @@ resource "null_resource" "frontdoor_rules_engine" {
 
   triggers = {
     frontdoor_name = azurerm_frontdoor.frontdoor[each.key].name
-    rules_engine   = join(" ", local.frontdoor_rules_engine_keys.override)
+    rules_engine   = join(" ", local.frontdoor_rules_engine_action.override)
   }
 
   provisioner "local-exec" {
     environment = {
-      RULES = join("|", local.frontdoor_rules_engine_keys.override)
+      RULES = join("|", local.frontdoor_rules_engine_action.override)
     }
 
     command = "for REMOVE_RULE in $(az network front-door rules-engine list --resource-group ${azurerm_frontdoor.frontdoor[each.key].resource_group_name} --front-door-name ${azurerm_frontdoor.frontdoor[each.key].name} --query '[].name' -o tsv | egrep -v $RULES); do $(az network front-door rules-engine delete --resource-group ${azurerm_frontdoor.frontdoor[each.key].resource_group_name} --front-door-name ${azurerm_frontdoor.frontdoor[each.key].name} --name $REMOVE_RULE); done"
@@ -336,7 +336,7 @@ resource "null_resource" "frontdoor_rules_engine" {
 }
 
 resource "azurerm_frontdoor_rules_engine" "frontdoor_rules_engine" {
-  for_each = toset(local.frontdoor_rules_engine_keys.header)
+  for_each = toset(local.frontdoor_rules_engine_action.header)
 
   name                = local.frontdoor_rules_engine[each.key].name == "" ? each.key : local.frontdoor_rules_engine[each.key].name
   frontdoor_name      = local.frontdoor_rules_engine[each.key].frontdoor_name

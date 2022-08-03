@@ -125,9 +125,9 @@ locals {
     frontdoor_custom_https_configuration = {
       custom_https_provisioning_enabled          = false
       certificate_source                         = "FrontDoor"
-      azure_key_vault_certificate_vault_id       = ""
-      azure_key_vault_certificate_secret_name    = ""
-      azure_key_vault_certificate_secret_version = ""
+      azure_key_vault_certificate_vault_id       = null
+      azure_key_vault_certificate_secret_name    = null
+      azure_key_vault_certificate_secret_version = null
     }
     frontdoor_rules_engine = {
       name = ""
@@ -313,7 +313,7 @@ locals {
               config => merge(
                 merge(local.default.frontdoor_rules_engine.rule[config], local.frontdoor_rules_engine_rule_values[frontdoor_rules_engine][rulekey][config]),
                 {
-                  for subconfig in ["route_configuration_override"] :
+                  for subconfig in keys(local.frontdoor_rules_engine_rule_values[frontdoor_rules_engine][rulekey][config]) :
                   subconfig => merge(local.default.frontdoor_rules_engine.rule[config][subconfig], local.frontdoor_rules_engine_rule_values[frontdoor_rules_engine][rulekey][config][subconfig])
                 }
               )
@@ -321,7 +321,7 @@ locals {
             {
               for config in ["match_condition"] :
               config => {
-                for key in keys(local.frontdoor_rules_engine_rule_values[frontdoor_rules_engine][rulekey][config]) :
+                for key in keys(lookup(local.frontdoor_rules_engine_values[frontdoor_rules_engine].rule[rulekey], config, {})) :
                 key => merge(local.default.frontdoor_rules_engine.rule[config], local.frontdoor_rules_engine_rule_values[frontdoor_rules_engine][rulekey][config][key])
               }
             }
@@ -335,18 +335,16 @@ locals {
   * resource "azurerm_frontdoor_rules_engine" "frontdoor_rules_engine"
   * resource "azurerm_resource_group_template_deployment" "frontdoor_rules_engine"
   */
-  frontdoor_rules_engine_keys = {
+  frontdoor_rules_engine_action = {
     for engine_key, engine_match in {
       header   = false
       override = true
     } :
-    engine_key => compact(distinct(flatten(
-      [
-        for frontdoor_rules_engine in keys(local.frontdoor_rules_engine) : [
-          for rulekey in keys(local.frontdoor_rules_engine[frontdoor_rules_engine].rule) :
-          contains(keys(local.frontdoor_rules_engine[frontdoor_rules_engine].rule[rulekey].action), "route_configuration_override") == engine_match ? frontdoor_rules_engine : ""
+    engine_key => compact(distinct(flatten([
+      for frontdoor_rules_engine in keys(var.frontdoor_rules_engine) : [
+          for rulekey in keys(var.frontdoor_rules_engine[frontdoor_rules_engine].rule) :
+          contains(keys(var.frontdoor_rules_engine[frontdoor_rules_engine].rule[rulekey].action), "route_configuration_override") == engine_match ? frontdoor_rules_engine : ""
         ]
-      ]
-    )))
+    ])))
   }
 }
