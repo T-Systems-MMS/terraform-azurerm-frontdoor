@@ -45,7 +45,9 @@ This module manages Azure FrontDoor.
 | Name | Description |
 |------|-------------|
 | frontdoor | azurerm_frontdoor results |
+| frontdoor_custom_https_configuration | azurerm_frontdoor_custom_https_configuration results |
 | frontdoor_firewall_policy | azurerm_frontdoor_firewall_policy results |
+| frontdoor_rules_engine | azurerm_frontdoor_rules_engine results |
 
 ## Examples
 

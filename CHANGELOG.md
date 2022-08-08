@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.1.1](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.1.1) (2022-08-03)
+## [2.1.1](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.1.1) (2022-08-08)
 
 [Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/2.1.0...2.1.1)
 
