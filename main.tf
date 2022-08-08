@@ -328,10 +328,9 @@ resource "null_resource" "frontdoor_routing_rule-rules_engine" {
   provisioner "local-exec" {
     environment = {
       ROUTING_RULES = local.frontdoor_rules_engine[each.key].routing_rule_name
-      RULES_ENGINE  = contains(local.frontdoor_rules_engine_action.override, each.key) == true ? azurerm_resource_group_template_deployment.frontdoor_rules_engine[each.key].name : azurerm_frontdoor_rules_engine.frontdoor_rules_engine[each.key].name
     }
 
-    command = "for ROUTING_RULE in $ROUTING_RULES; do $(az network front-door routing-rule update --name $ROUTING_RULE --resource-group ${local.frontdoor_rules_engine[each.key].resource_group_name} --front-door-name ${local.frontdoor_rules_engine[each.key].frontdoor_name} --rules-engine $RULES_ENGINE); done"
+    command = "for ROUTING_RULE in $ROUTING_RULES; do az network front-door routing-rule update --name $ROUTING_RULE --resource-group ${local.frontdoor_rules_engine[each.key].resource_group_name} --front-door-name ${local.frontdoor_rules_engine[each.key].frontdoor_name} --rules-engine ${each.key}; done"
   }
 }
 
