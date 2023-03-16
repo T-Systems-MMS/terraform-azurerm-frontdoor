@@ -340,7 +340,7 @@ resource "null_resource" "frontdoor_rules_engine" {
 
   triggers = {
     frontdoor_name = azurerm_frontdoor.frontdoor[each.key].name
-    rules_engine   = join(" ", [for rules_engine in keys(var.frontdoor_rules_engine): var.frontdoor_rules_engine[rules_engine].frontdoor_name == azurerm_frontdoor.frontdoor[each.key].name ? rules_engine : ""])
+    rules_engine   = join(" ", [for rules_engine in keys(var.frontdoor_rules_engine) : var.frontdoor_rules_engine[rules_engine].frontdoor_name == azurerm_frontdoor.frontdoor[each.key].name ? rules_engine : ""])
   }
 
   provisioner "local-exec" {
