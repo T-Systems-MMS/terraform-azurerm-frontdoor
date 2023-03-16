@@ -246,7 +246,7 @@ resource "azurerm_frontdoor_custom_https_configuration" "frontdoor_custom_https_
 resource "azurerm_resource_group_template_deployment" "frontdoor_rules_engine" {
   for_each = toset(local.frontdoor_rules_engine_action.override)
 
-  name                = local.frontdoor_rules_engine[each.key].name == "" ? each.key : local.frontdoor_rules_engine[each.key].name
+  name                = format("%s_%s", local.frontdoor_rules_engine[each.key].frontdoor_name, local.frontdoor_rules_engine[each.key].name == "" ? each.key : local.frontdoor_rules_engine[each.key].name)
   resource_group_name = local.frontdoor_rules_engine[each.key].resource_group_name
   deployment_mode     = local.frontdoor_rules_engine[each.key].deployment_mode
 
@@ -262,7 +262,7 @@ resource "azurerm_resource_group_template_deployment" "frontdoor_rules_engine" {
                     %{for rule in keys(local.frontdoor_rules_engine[each.key].rule)}
                     %{if index(keys(local.frontdoor_rules_engine[each.key].rule), rule) > 0},{%{else}{%{endif}
                         "priority": "${local.frontdoor_rules_engine[each.key].rule[rule].priority}",
-                        "name": "${format("%s", local.frontdoor_rules_engine[each.key].rule[rule].name == "" ? rule : local.frontdoor_rules_engine[each.key].resource_group_name.rule[rule].name)}",
+                        "name": "${format("%s", local.frontdoor_rules_engine[each.key].rule[rule].name == "" ? rule : local.frontdoor_rules_engine[each.key].rule[rule].name)}",
                         "matchProcessingBehavior": "${local.frontdoor_rules_engine[each.key].rule[rule].match_processing_behavior}",
                         "action": {
                             "requestHeaderActions": [
@@ -340,7 +340,7 @@ resource "null_resource" "frontdoor_rules_engine" {
 
   triggers = {
     frontdoor_name = azurerm_frontdoor.frontdoor[each.key].name
-    rules_engine   = join(" ", keys(var.frontdoor_rules_engine))
+    rules_engine   = join(" ", [for rules_engine in keys(var.frontdoor_rules_engine) : var.frontdoor_rules_engine[rules_engine].frontdoor_name == azurerm_frontdoor.frontdoor[each.key].name ? rules_engine : ""])
   }
 
   provisioner "local-exec" {
@@ -363,7 +363,7 @@ resource "azurerm_frontdoor_rules_engine" "frontdoor_rules_engine" {
     for_each = local.frontdoor_rules_engine[each.key].rule
 
     content {
-      name     = local.frontdoor_rules_engine[each.key].rule[rule.key].name == "" ? rule.key : local.frontdoor_rules_engine[each.key].resource_group_name.rule[rule.key].name
+      name     = local.frontdoor_rules_engine[each.key].rule[rule.key].name == "" ? rule.key : local.frontdoor_rules_engine[each.key].rule[rule.key].name
       priority = local.frontdoor_rules_engine[each.key].rule[rule.key].priority
 
       action {
@@ -402,4 +402,3 @@ resource "azurerm_frontdoor_rules_engine" "frontdoor_rules_engine" {
     }
   }
 }
-
