@@ -4,6 +4,10 @@
 
 [Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/2.1.0...2.1.1)
 
+**Fixed bugs:**
+
+- Issue combine actions [\#19](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/19) ([michaelamattes](https://github.com/michaelamattes))
+
 **Closed issues:**
 
 - Supporting Front Door Service exclusion lists in WAF [\#17](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/issues/17)
