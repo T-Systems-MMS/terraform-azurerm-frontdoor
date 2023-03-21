@@ -330,7 +330,7 @@ resource "null_resource" "frontdoor_routing_rule-rules_engine" {
       ROUTING_RULES = local.frontdoor_rules_engine[each.key].routing_rule_name
     }
 
-    command = "for ROUTING_RULE in $ROUTING_RULES; do az network front-door routing-rule update --name $ROUTING_RULE --resource-group ${local.frontdoor_rules_engine[each.key].resource_group_name} --front-door-name ${local.frontdoor_rules_engine[each.key].frontdoor_name} --rules-engine ${each.key}; done"
+    command = "for ROUTING_RULE in $ROUTING_RULES; do az network front-door routing-rule update --name $ROUTING_RULE --resource-group ${local.frontdoor_rules_engine[each.key].resource_group_name} --front-door-name ${local.frontdoor_rules_engine[each.key].frontdoor_name} --rules-engine ${var.frontdoor_rules_engine[each.key].name == "" ? each.key : var.frontdoor_rules_engine[each.key].name}; done"
   }
 }
 
@@ -340,7 +340,7 @@ resource "null_resource" "frontdoor_rules_engine" {
 
   triggers = {
     frontdoor_name = azurerm_frontdoor.frontdoor[each.key].name
-    rules_engine   = join(" ", [for rules_engine in keys(var.frontdoor_rules_engine) : var.frontdoor_rules_engine[rules_engine].frontdoor_name == azurerm_frontdoor.frontdoor[each.key].name ? rules_engine : ""])
+    rules_engine   = join("", [for rules_engine in keys(var.frontdoor_rules_engine) : var.frontdoor_rules_engine[rules_engine].frontdoor_name == azurerm_frontdoor.frontdoor[each.key].name ? rules_engine : ""])
   }
 
   provisioner "local-exec" {
