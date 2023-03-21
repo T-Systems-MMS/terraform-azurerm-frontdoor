@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.1.2](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.1.2) (2023-03-16)
+
+[Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/2.1.1...2.1.2)
+
+**Fixed bugs:**
+
+- fix failure for unique names on template deployment, fix failure trig… [\#23](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/23) ([michaelamattes](https://github.com/michaelamattes))
+
+**Merged pull requests:**
+
+- add Renovate Dependency Dashboard and automatic merge on patch updates [\#22](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/22) ([michaelamattes](https://github.com/michaelamattes))
+- chore\(deps\): update actions/checkout action to v3.2.0 [\#21](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/21) ([renovate[bot]](https://github.com/apps/renovate))
+- Update actions/checkout action to v3.1.0 [\#20](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/pull/20) ([renovate[bot]](https://github.com/apps/renovate))
+
 ## [2.1.1](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/tree/2.1.1) (2022-08-08)
 
 [Full Changelog](https://github.com/T-Systems-MMS/terraform-azurerm-frontdoor/compare/2.1.0...2.1.1)
